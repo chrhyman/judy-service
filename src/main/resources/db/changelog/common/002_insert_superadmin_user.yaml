@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002_insert_superadmin_user
+      author: chris@wugs.me
+      changes:
+        - insert:
+            tableName: user
+            columns:
+              - column: { name: id, type: UUID, value: "99965579-4102-4755-a81d-e7249dd569d3" }
+              - column: { name: username, type: VARCHAR(50), value: "SuperAdmin" }
+              - column: { name: email, type: VARCHAR(255), value: "superadmin@wugs.me" }
+              - column: { name: password, type: VARCHAR(255), value: "${SUPERADMIN_PASSWORD_HASH}" }
+              - column: { name: role, type: VARCHAR(50), value: "SUPERADMIN" }

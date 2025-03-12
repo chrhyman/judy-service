@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '7.0.2'
+}
+
+group = 'me.wugs'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+spotless {
+	java {
+		googleJavaFormat()
+		formatAnnotations()
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+	implementation 'io.jsonwebtoken:jjwt:0.12.6'
+	implementation "me.paulschwarz:spring-dotenv:4.0.0"
+	compileOnly 'org.projectlombok:lombok'
+	compileOnly 'org.jetbrains:annotations:17.0.0'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.6'
+	testImplementation 'org.testcontainers:postgresql:1.20.6'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+tasks.named("compileJava").configure {
+	dependsOn("spotlessApply")
+}
+
+tasks.named("build").configure {
+	dependsOn("spotlessCheck")
+}
