@@ -1,5 +1,6 @@
 package me.wugs.judy.exception;
 
+import me.wugs.judy.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,8 +20,9 @@ public class GlobalExceptionHandler {
    * @return BadRequest ResponseEntity
    */
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-    return ResponseEntity.badRequest().body(ex.getMessage());
+  public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
+      IllegalArgumentException ex) {
+    return ResponseEntity.badRequest().body(new ErrorResponseDto(ex.getMessage()));
   }
 
   /**
@@ -30,8 +32,8 @@ public class GlobalExceptionHandler {
    * @return Forbidden ResponseEntity
    */
   @ExceptionHandler(SecurityException.class)
-  public ResponseEntity<String> handleSecurityException(SecurityException ex) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+  public ResponseEntity<ErrorResponseDto> handleSecurityException(SecurityException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponseDto(ex.getMessage()));
   }
 
   /**
@@ -42,8 +44,8 @@ public class GlobalExceptionHandler {
    * @return InternalServerError ResponseEntity
    */
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<String> handleGenericException(Exception ex) {
+  public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body("An unexpected error occurred.");
+        .body(new ErrorResponseDto("An unexpected error occurred."));
   }
 }
