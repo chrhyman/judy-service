@@ -1,7 +1,5 @@
 spring:
-  logging:
-    level:
-      liquibase: DEBUG
+
   application:
     name: judy
 
@@ -23,3 +21,8 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     parameters:
       SUPERADMIN_PASSWORD_HASH: "${SUPERADMIN_PASSWORD_HASH}"
+
+cors:
+  allowed-origins:
+    - "http://localhost:5173"
+    - "https://liza.wugs.me"
