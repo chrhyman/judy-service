@@ -34,6 +34,17 @@ public class UserController {
     return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  @GetMapping("/me")
+  public ResponseEntity<UserDto> getAuthenticatedUser(Authentication auth) {
+    if (auth == null) {
+      throw new SecurityException("You must log in to perform that operation.");
+    }
+    UUID requesterId = UUID.fromString(auth.getName());
+    Optional<UserDto> user = userService.getUserById(requesterId);
+
+    return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
   @GetMapping("/exists/username/{username}")
   public ResponseEntity<String> checkUsernameExists(@PathVariable String username) {
     return ResponseEntity.ok(String.valueOf(userService.existsByUsername(username)));
