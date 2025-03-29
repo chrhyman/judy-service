@@ -1,6 +1,6 @@
 package me.wugs.judy.exception;
 
-import me.wugs.judy.dto.ErrorResponseDto;
+import me.wugs.judy.dto.StatusResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,26 +14,37 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
   /**
-   * Transforms IllegalArgumentException into a BadRequest with the message in the body
+   * Transforms BadRequestException into a BadRequest with the message in the body
    *
    * @param ex the Exception to handle
    * @return BadRequest ResponseEntity
    */
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
-      IllegalArgumentException ex) {
-    return ResponseEntity.badRequest().body(new ErrorResponseDto(ex.getMessage()));
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<StatusResponseDto> handleBadRequestException(BadRequestException ex) {
+    return ResponseEntity.badRequest().body(new StatusResponseDto(ex.getMessage()));
   }
 
   /**
-   * Transforms SecurityException into a Forbidden response with the message in the body
+   * Transforms ForbiddenException into a Forbidden response with the message in the body
    *
    * @param ex the Exception to handle
    * @return Forbidden ResponseEntity
    */
-  @ExceptionHandler(SecurityException.class)
-  public ResponseEntity<ErrorResponseDto> handleSecurityException(SecurityException ex) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponseDto(ex.getMessage()));
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<StatusResponseDto> handleForbiddenException(ForbiddenException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new StatusResponseDto(ex.getMessage()));
+  }
+
+  /**
+   * Transforms UnauthorizedException into an Unauthorized response with the message in the body
+   *
+   * @param ex the Exception to handle
+   * @return Unauthorized ResponseEntity
+   */
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<StatusResponseDto> handleUnauthorizedException(UnauthorizedException ex) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(new StatusResponseDto(ex.getMessage()));
   }
 
   /**
@@ -44,8 +55,8 @@ public class GlobalExceptionHandler {
    * @return InternalServerError ResponseEntity
    */
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
+  public ResponseEntity<StatusResponseDto> handleGenericException(Exception ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(new ErrorResponseDto("An unexpected error occurred."));
+        .body(new StatusResponseDto("An unexpected error occurred."));
   }
 }

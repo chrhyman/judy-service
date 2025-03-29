@@ -6,6 +6,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import me.wugs.judy.dto.UserDto;
 import me.wugs.judy.enums.UserRole;
+import me.wugs.judy.exception.ForbiddenException;
+import me.wugs.judy.exception.UnauthorizedException;
 import me.wugs.judy.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,20 +39,20 @@ public class UserController {
   @GetMapping("/me")
   public ResponseEntity<UserDto> getAuthenticatedUser(Authentication auth) {
     if (auth == null) {
-      throw new SecurityException("You must log in to perform that operation.");
+      throw new UnauthorizedException("You must log in to perform that operation.");
     }
-    UUID requesterId = UUID.fromString(auth.getName());
-    Optional<UserDto> user = userService.getUserById(requesterId);
+    String requesterUsername = auth.getName();
+    Optional<UserDto> user = userService.getUserByIdentifier(requesterUsername);
 
     return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @GetMapping("/exists/username/{username}")
-  public ResponseEntity<String> checkUsernameExists(@PathVariable String username) {
-    return ResponseEntity.ok(String.valueOf(userService.existsByUsername(username)));
+  public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
+    return ResponseEntity.ok(userService.existsByUsername(username));
   }
 
-  @GetMapping("/exists/email/{email}")
+  @GetMapping("/exists/identifier/{identifier}")
   public ResponseEntity<Boolean> checkEmailExists(@PathVariable String email) {
     return ResponseEntity.ok(userService.existsByEmail(email));
   }
@@ -65,7 +67,7 @@ public class UserController {
       Authentication auth) {
     // JwtAuthFilter supplies user UUID as the "name" in auth, which is required
     if (auth == null) {
-      throw new SecurityException("Only SuperAdmins can delete users.");
+      throw new ForbiddenException("Only SuperAdmins can delete users.");
     }
     UUID requesterId = UUID.fromString(auth.getName());
 
@@ -78,7 +80,7 @@ public class UserController {
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable UUID id, Authentication auth) {
     if (auth == null) {
-      throw new SecurityException("Only SuperAdmins can delete users.");
+      throw new ForbiddenException("Only SuperAdmins can delete users.");
     }
     UUID requesterId = UUID.fromString(auth.getName());
 
@@ -91,7 +93,7 @@ public class UserController {
   public ResponseEntity<UserDto> changeUserRole(
       @PathVariable UUID id, @RequestParam UserRole newRole, Authentication auth) {
     if (auth == null) {
-      throw new SecurityException("Only SuperAdmins can change user roles.");
+      throw new ForbiddenException("Only SuperAdmins can change user roles.");
     }
     UUID requesterId = UUID.fromString(auth.getName());
 

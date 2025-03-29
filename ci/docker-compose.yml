@@ -1,0 +1,16 @@
+services:
+  judy-db:
+    image: postgres:16
+    container_name: judy-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-judy}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-judy_password}
+      POSTGRES_DB: ${DB_NAME:-judy_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

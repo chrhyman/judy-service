@@ -1,15 +1,15 @@
 package me.wugs.judy.controller;
 
-import java.util.UUID;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import me.wugs.judy.dto.AuthLoginDto;
-import me.wugs.judy.dto.AuthRegisterDto;
-import me.wugs.judy.dto.TokenResponseDto;
-import me.wugs.judy.dto.UserDto;
-import me.wugs.judy.security.JwtUtil;
+import me.wugs.judy.dto.*;
+import me.wugs.judy.exception.UnauthorizedException;
 import me.wugs.judy.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final JwtUtil jwtUtil;
   private final UserService userService;
+  private final AuthenticationManager authenticationManager;
 
   @GetMapping
   public ResponseEntity<String> getMyAuth(Authentication auth) {
@@ -31,21 +31,37 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<TokenResponseDto> login(@RequestBody @NotNull AuthLoginDto authLoginDto) {
-    UUID userId = userService.authenticatePassword(authLoginDto.email(), authLoginDto.password());
-    String token = jwtUtil.generateToken(userId);
+  public ResponseEntity<UserDto> login(
+      @RequestBody @NotNull AuthLoginDto authLoginDto, HttpSession session) {
 
-    return ResponseEntity.ok(new TokenResponseDto(token));
+    UserDto user =
+        userService
+            .getUserByIdentifier(authLoginDto.identifier())
+            .orElseThrow(() -> new UnauthorizedException("Invalid credentials."));
+
+    Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(user.username(), authLoginDto.password()));
+
+    session.setAttribute("userId", user.id());
+
+    return ResponseEntity.ok(user);
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<StatusResponseDto> logout(
+      @CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {
+
+    return ResponseEntity.ok(new StatusResponseDto("Logged out."));
   }
 
   @PostMapping("/register")
-  public ResponseEntity<TokenResponseDto> registerUser(
-      @RequestBody @NotNull AuthRegisterDto authRegisterDto) {
+  public ResponseEntity<UserDto> registerUser(
+      @RequestBody @NotNull AuthRegisterDto authRegisterDto, HttpServletResponse response) {
     UserDto user =
         userService.createUser(
             authRegisterDto.username(), authRegisterDto.email(), authRegisterDto.password());
-    String token = jwtUtil.generateToken(user.id());
 
-    return ResponseEntity.ok(new TokenResponseDto(token));
+    return ResponseEntity.ok(user);
   }
 }
