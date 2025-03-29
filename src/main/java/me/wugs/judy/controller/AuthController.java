@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,15 +23,6 @@ public class AuthController {
   private final UserService userService;
   private final AuthenticationManager authenticationManager;
 
-  @GetMapping
-  public ResponseEntity<String> getMyAuth(Authentication auth) {
-    if (auth == null) {
-      return ResponseEntity.ok("");
-    } else {
-      return ResponseEntity.ok(auth.getName());
-    }
-  }
-
   @PostMapping("/login")
   public ResponseEntity<UserDto> login(
       @RequestBody @NotNull AuthLoginDto authLoginDto, HttpSession session) {
@@ -39,19 +32,25 @@ public class AuthController {
             .getUserByIdentifier(authLoginDto.identifier())
             .orElseThrow(() -> new UnauthorizedException("Invalid credentials."));
 
-    Authentication authentication =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(user.username(), authLoginDto.password()));
+    try {
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(user.username(), authLoginDto.password()));
 
-    session.setAttribute("userId", user.id());
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+      session.setAttribute("userId", user.id());
 
-    return ResponseEntity.ok(user);
+      return ResponseEntity.ok(user);
+
+    } catch (AuthenticationException e) {
+      throw new UnauthorizedException("Invalid credentials.");
+    }
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<StatusResponseDto> logout(
-      @CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {
-
+  public ResponseEntity<StatusResponseDto> logout(HttpSession session) {
+    session.invalidate();
     return ResponseEntity.ok(new StatusResponseDto("Logged out."));
   }
 
