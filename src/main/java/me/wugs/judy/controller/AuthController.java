@@ -1,6 +1,5 @@
 package me.wugs.judy.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import me.wugs.judy.dto.*;
@@ -56,7 +55,7 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<UserDto> registerUser(
-      @RequestBody @NotNull AuthRegisterDto authRegisterDto, HttpServletResponse response) {
+      @RequestBody @NotNull AuthRegisterDto authRegisterDto) {
     UserDto user =
         userService.createUser(
             authRegisterDto.username(), authRegisterDto.email(), authRegisterDto.password());
