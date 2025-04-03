@@ -10,4 +10,5 @@ databaseChangeLog:
               - column: { name: username, type: VARCHAR(50), value: "SuperAdmin" }
               - column: { name: email, type: VARCHAR(255), value: "superadmin@wugs.me" }
               - column: { name: password, type: VARCHAR(255), value: "${SUPERADMIN_PASSWORD_HASH}" }
+              - column: { name: enabled, type: BOOLEAN, value: "true" }
               - column: { name: role, type: VARCHAR(50), value: "SUPERADMIN" }

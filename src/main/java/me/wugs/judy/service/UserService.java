@@ -37,6 +37,10 @@ public class UserService {
     return userByUsername.or(() -> userByEmail).map(UserDto::fromEntity);
   }
 
+  public boolean existsByIdentifier(String identifier) {
+    return (existsByUsername(identifier) || existsByEmail(identifier));
+  }
+
   public boolean existsByUsername(String username) {
     return userRepository.existsByUsername(username);
   }
@@ -47,9 +51,6 @@ public class UserService {
 
   @Transactional
   public UserDto createUser(String username, String email, String rawPassword) {
-    if (existsByUsername(username) || existsByEmail(email))
-      throw new BadRequestException("Username or identifier already exists.");
-
     if (username.isBlank()) throw new BadRequestException("Username cannot be blank.");
     if (email.isBlank()) throw new BadRequestException("Email cannot be blank.");
     if (rawPassword.isBlank()) throw new BadRequestException("Password cannot be blank.");
@@ -58,11 +59,15 @@ public class UserService {
       throw new BadRequestException(
           "Username may only include alphanumeric and underscore characters.");
 
+    if (existsByIdentifier(username) || existsByIdentifier(email))
+      throw new BadRequestException("Username or email already exists.");
+
     User userRequest =
         User.builder()
             .username(username)
             .email(email)
             .password(passwordEncoder.encode(rawPassword))
+            .enabled(true) // all users enabled by default; TODO: email verification
             .role(UserRole.USER)
             .build();
 

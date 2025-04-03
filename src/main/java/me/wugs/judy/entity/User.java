@@ -29,6 +29,9 @@ public class User {
   @Column(nullable = false)
   private String password;
 
+  @Column(nullable = false)
+  private boolean enabled;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private UserRole role;
@@ -47,13 +50,12 @@ public class User {
     if (this.role == null) {
       this.role = UserRole.USER;
     }
-    // If createdAt already exists, it cannot be updated, but we can supply it for a newly created
-    // User
+    // If createdAt already exists, it cannot be updated
+    // We supply it for a newly created User
     if (this.createdAt == null) {
       this.createdAt = Instant.now();
     }
-    // The Dev can set the DTO or Entity update time, but ultimately the PrePersist function should
-    // take precedence
+    // the PrePersist function takes precedence over manual DTO assignment
     this.updatedAt = Instant.now();
   }
 }

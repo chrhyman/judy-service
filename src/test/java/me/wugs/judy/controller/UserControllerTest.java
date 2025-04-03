@@ -41,7 +41,13 @@ public class UserControllerTest {
     userId = UUID.randomUUID();
     userDto =
         new UserDto(
-            userId, "testuser", "test@example.com", UserRole.USER, Instant.now(), Instant.now());
+            userId,
+            "testuser",
+            "test@example.com",
+            true,
+            UserRole.USER,
+            Instant.now(),
+            Instant.now());
     when(userRepository.findById(userId))
         .thenReturn(
             Optional.of(
@@ -50,6 +56,7 @@ public class UserControllerTest {
                     userDto.username(),
                     userDto.email(),
                     "hashedpassword",
+                    true,
                     UserRole.USER,
                     Instant.now(),
                     Instant.now())));

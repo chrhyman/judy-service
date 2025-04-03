@@ -30,6 +30,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: enabled
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                    defaultValue: "false"
+              - column:
                   name: role
                   type: VARCHAR(50)
                   constraints:

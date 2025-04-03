@@ -48,6 +48,13 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponseDto("Unauthorized", ex.getMessage()));
   }
 
+  @ExceptionHandler(TooManyRequestsException.class)
+  public ResponseEntity<ErrorResponseDto> handleTooManyRequestsException(
+      TooManyRequestsException ex) {
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+        .body(new ErrorResponseDto("Too Many Requests", ex.getMessage()));
+  }
+
   /**
    * Transforms all other exceptions into an InternalServerError. The message is not sent to the
    * user, as it may contain unexpected information that may be too sensitive to leak.

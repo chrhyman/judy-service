@@ -12,17 +12,25 @@ import me.wugs.judy.enums.UserRole;
  * @param id UUID
  * @param username String
  * @param email String
+ * @param enabled boolean
  * @param role UserRole
  * @param createdAt Instant
  * @param updatedAt Instant
  */
 public record UserDto(
-    UUID id, String username, String email, UserRole role, Instant createdAt, Instant updatedAt) {
+    UUID id,
+    String username,
+    String email,
+    boolean enabled,
+    UserRole role,
+    Instant createdAt,
+    Instant updatedAt) {
   public static UserDto fromEntity(User user) {
     return new UserDto(
         user.getId(),
         user.getUsername(),
         user.getEmail(),
+        user.isEnabled(),
         user.getRole(),
         user.getCreatedAt(),
         user.getUpdatedAt());

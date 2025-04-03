@@ -36,7 +36,7 @@ public class AuthControllerTest {
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
-    userDto = new UserDto(userId, "testuser", "test@example.com", UserRole.USER, null, null);
+    userDto = new UserDto(userId, "testuser", "test@example.com", true, UserRole.USER, null, null);
 
     when(userService.createUser("testuser", "test@example.com", "password")).thenReturn(userDto);
   }

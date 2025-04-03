@@ -1,9 +1,12 @@
 package me.wugs.judy.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import me.wugs.judy.dto.*;
+import me.wugs.judy.enums.RateLimitedEndpoint;
 import me.wugs.judy.exception.UnauthorizedException;
+import me.wugs.judy.security.RateLimitingInterceptor;
 import me.wugs.judy.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
+  private final RateLimitingInterceptor rateLimiter;
   private final UserService userService;
   private final AuthenticationManager authenticationManager;
 
@@ -55,7 +59,9 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<UserDto> registerUser(
-      @RequestBody @NotNull AuthRegisterDto authRegisterDto) {
+      @RequestBody @NotNull AuthRegisterDto authRegisterDto, HttpServletRequest request) {
+    // Only one registration is permitted per 5 minutes
+    rateLimiter.checkRateLimit(request.getRemoteAddr(), RateLimitedEndpoint.register);
     UserDto user =
         userService.createUser(
             authRegisterDto.username(), authRegisterDto.email(), authRegisterDto.password());
