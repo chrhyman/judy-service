@@ -47,12 +47,14 @@ public class UserController {
     return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  // api/users/exists/** permitted without authentication
   @GetMapping("/exists/username/{username}")
   public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
     return ResponseEntity.ok(userService.existsByUsername(username));
   }
 
-  @GetMapping("/exists/identifier/{identifier}")
+  // api/users/exists/** permitted without authentication
+  @GetMapping("/exists/email/{email}")
   public ResponseEntity<Boolean> checkEmailExists(@PathVariable String email) {
     return ResponseEntity.ok(userService.existsByEmail(email));
   }

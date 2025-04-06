@@ -26,6 +26,8 @@ public class AuthController {
   private final UserService userService;
   private final AuthenticationManager authenticationManager;
 
+  // TODO: ignore case in login, ignore case in check exists, preserve casing from registration for
+  // display
   @PostMapping("/login")
   public ResponseEntity<UserDto> login(
       @RequestBody @NotNull AuthLoginDto authLoginDto, HttpSession session) {
@@ -59,12 +61,23 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<UserDto> registerUser(
-      @RequestBody @NotNull AuthRegisterDto authRegisterDto, HttpServletRequest request) {
+      @RequestBody @NotNull AuthRegisterDto authRegisterDto,
+      HttpServletRequest request,
+      HttpSession session) {
     // Only one registration is permitted per 5 minutes
     rateLimiter.checkRateLimit(request.getRemoteAddr(), RateLimitedEndpoint.register);
     UserDto user =
         userService.createUser(
             authRegisterDto.username(), authRegisterDto.email(), authRegisterDto.password());
+
+    // Not wrapped in try-catch since we expect this to succeed; if it throws,
+    // GlobalExceptionHandler's got us
+    Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(user.username(), authRegisterDto.password()));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+    session.setAttribute("userId", user.id());
 
     return ResponseEntity.ok(user);
   }
